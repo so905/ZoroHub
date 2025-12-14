@@ -978,34 +978,10 @@ local Toggle_autoPlaceEggs = PetEggs:CreateToggle({
 })
 
 --Auto hatch
-PetEggs:CreateSection("Hatching Settings")
-local hatchingDelayTime = 0.5
-local Input_hatchingDelay = PetEggs:CreateInput({
-    Name = "Hatching Time (seconds)",
-    CurrentValue = "0.5",
-    PlaceholderText = "delay between each hatch",
-    RemoveTextAfterFocusLost = false,
-    Flag = "hatchingDelayTime",
-    Callback = function(Text)
-        hatchingDelayTime = tonumber(Text) or 0.5
-    end,
-})
-local hatchBatchSize = 1
-local Input_hatchBatchSize = PetEggs:CreateInput({
-    Name = "Batch Size (eggs per cycle)",
-    CurrentValue = "1",
-    PlaceholderText = "1 = one by one",
-    RemoveTextAfterFocusLost = false,
-    Flag = "hatchBatchSize",
-    Callback = function(Text)
-        hatchBatchSize = tonumber(Text) or 1
-    end,
-})
 PetEggs:CreateButton({
     Name = "Click to HATCH ALL",
     Callback = function()
         print("[BeastHub] Hatching eggs...")
-        beastHubNotify("Hatching", "Delay: "..tostring(hatchingDelayTime).."s | Batch: "..tostring(hatchBatchSize), 3)
 
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local PetEggService = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("PetEggService")
@@ -1013,27 +989,19 @@ PetEggs:CreateButton({
         -- Get all PetEgg models in your farm
         local petEggs = myFunctions.getMyFarmPetEggs()
         if #petEggs == 0 then
-            beastHubNotify("No eggs", "No PetEggs found in your farm!", 3)
+            --print("[BeastHub] No PetEggs found in your farm!")
             return
         end
 
-        -- Loop through all eggs with delay and batch control
-        local count = 0
+        -- Loop through all eggs and fire the hatch event
         for _, egg in ipairs(petEggs) do
             local args = {
                 [1] = "HatchPet",
                 [2] = egg
             }
             PetEggService:FireServer(unpack(args))
-            count = count + 1
-            
-            -- Apply delay after each batch
-            if count >= hatchBatchSize then
-                task.wait(hatchingDelayTime)
-                count = 0
-            end
+            --print("[BeastHub] Fired hatch for:", egg.Name)
         end
-        beastHubNotify("Hatching Complete", "All eggs hatched!", 3)
     end,
 })
 PetEggs:CreateDivider()
@@ -1081,7 +1049,7 @@ local function autoSellPets(targetPets, weightTargetBelow, onComplete)
                 task.wait(0.2) -- ensure pet equips before selling
                 SellPet_RE:FireServer(item.Name)
                 print("Sold:", item.Name)
-                task.wait(autoSellDelayTime or 0.3)
+                task.wait(0.3)
             end
         end
     end
@@ -1095,19 +1063,6 @@ end
 
 
 --auto sell pets UI
-PetEggs:CreateSection("Auto Sell Settings")
-local autoSellDelayTime = 0.3
-local Input_autoSellDelay = PetEggs:CreateInput({
-    Name = "Auto Sell Delay (seconds)",
-    CurrentValue = "0.3",
-    PlaceholderText = "delay between each sell",
-    RemoveTextAfterFocusLost = false,
-    Flag = "autoSellDelayTime",
-    Callback = function(Text)
-        autoSellDelayTime = tonumber(Text) or 0.3
-    end,
-})
-
 local selectedPets --for UI paragraph
 local selectedPetsForAutoSell = {} --container for dropdown
 local sealsLoady
@@ -2129,7 +2084,8 @@ Automation:CreateToggle({
                     local toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption or {}
                     if #petList == 0 or #toyList == 0 then
                         task.wait(1)
-                    else
+                        continue
+                    end
                     for _, pet in ipairs(petList) do
                         for _, toy in ipairs(toyList) do
                             if not autoPetBoostEnabled then
@@ -2151,7 +2107,6 @@ Automation:CreateToggle({
                         if not autoPetBoostEnabled then
                             break
                         end
-                    end
                     end
                     task.wait(2)
                 end
@@ -2215,7 +2170,8 @@ Automation:CreateToggle({
                     local selectedSprinklers = dropdown_sprinks.CurrentOption
                     if not selectedSprinklers or #selectedSprinklers == 0 or selectedSprinklers[1] == "None" then
                         task.wait(1)
-                    else
+                        continue
+                    end
                     for _, sprinkName in ipairs(selectedSprinklers) do
                         if autoSprinklerEnabled and not activeSprinklerThreads[sprinkName] then
                             activeSprinklerThreads[sprinkName] = task.spawn(function()
@@ -2238,7 +2194,6 @@ Automation:CreateToggle({
                             end)
                             task.wait(.5)
                         end
-                    end
                     end
                     task.wait(1)
                 end
