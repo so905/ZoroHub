@@ -2129,8 +2129,7 @@ Automation:CreateToggle({
                     local toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption or {}
                     if #petList == 0 or #toyList == 0 then
                         task.wait(1)
-                        continue
-                    end
+                    else
                     for _, pet in ipairs(petList) do
                         for _, toy in ipairs(toyList) do
                             if not autoPetBoostEnabled then
@@ -2152,6 +2151,7 @@ Automation:CreateToggle({
                         if not autoPetBoostEnabled then
                             break
                         end
+                    end
                     end
                     task.wait(2)
                 end
@@ -2215,8 +2215,7 @@ Automation:CreateToggle({
                     local selectedSprinklers = dropdown_sprinks.CurrentOption
                     if not selectedSprinklers or #selectedSprinklers == 0 or selectedSprinklers[1] == "None" then
                         task.wait(1)
-                        continue
-                    end
+                    else
                     for _, sprinkName in ipairs(selectedSprinklers) do
                         if autoSprinklerEnabled and not activeSprinklerThreads[sprinkName] then
                             activeSprinklerThreads[sprinkName] = task.spawn(function()
@@ -2239,6 +2238,7 @@ Automation:CreateToggle({
                             end)
                             task.wait(.5)
                         end
+                    end
                     end
                     task.wait(1)
                 end
